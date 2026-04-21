@@ -19,11 +19,24 @@ class Asset:
         self.investment = investment
         
 class Stock(Asset):
-    def __init__(self):
-        pass
+    def __init__(self,ticker,quantity,price):
+        self.ticker = ticker
+        self.quantity = quantity
+        self.price = price
+        
+        super().__init__(ticker,quantity*price)
+    
+    
+        
+        
 
 class Portfolio:
-    pass
+    """The Portfolio Class holds the different Asset objects the User has invested in and does the operation on them like 
+    viewing the portfolio"""
+    portfolio = []
+    def __str__(self,portfolio):
+        folio = "\n".join(portfolio)
+        return folio
 
 def get_number_input(prompt:str,low=0):
     while True:
@@ -47,7 +60,8 @@ def prompt_stock():
     ticker = input("Enter TICKER: ").upper()
     quantity = get_number_input("Enter Quantity: ")
     price = get_number_input("Enter Price: ")
-    stock = Stock(ticker,quantity,price)
+    return Stock(ticker,quantity,price)
+    
 def prompt_etf():
     """Prompts the User for detail input of the ETF (Exchange Traded Fund) to be added in Portfolio."""
     pass
@@ -100,7 +114,9 @@ def main():
 
             asset_type = get_number_input("Select an Asset Type (1 - 8): ")
             if (asset_type) == 1:
-                prompt_stock()
+                new_stock = prompt_stock()
+                vault.portfolio.append(new_stock)
+                print(f"The stock {new_stock.asset_name} is added to the portfolio.")
             elif (asset_type) == 2:
                 prompt_etf()
             elif (asset_type) == 3:
