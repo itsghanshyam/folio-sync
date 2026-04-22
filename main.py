@@ -1,3 +1,4 @@
+from datetime import datetime
 print("Folio-Sync Initialised")
 """Classes that will be needed: 
 User:           (when multiple users are there)
@@ -17,27 +18,37 @@ class Asset:
     def __init__(self,asset_name,investment):
         self.asset_name = asset_name
         self.investment = investment
-        
+
 class Stock(Asset):
     def __init__(self,ticker,quantity,price):
         self.ticker = ticker
         self.quantity = quantity
         self.price = price
-        
         super().__init__(ticker,quantity*price)
-    
-    
         
-        
+class ETF(Asset):
+    def __init__(self,ticker,quantity,price):
+        self.ticker = ticker
+        self.quantity = quantity
+        self.price = price
+        super().__init__(ticker,quantity*price)
+
 
 class Portfolio:
     """The Portfolio Class holds the different Asset objects the User has invested in and does the operation on them like 
     viewing the portfolio"""
-    portfolio = []
-    def __str__(self,portfolio):
-        folio = "\n".join(portfolio)
-        return folio
-
+    def __init__(self):
+        self.portfolio = []
+    def add_to_folio(self,item):
+        self.portfolio.append(item)
+    def view_portfolio(self):
+        result = ""
+        for asset in self.portfolio:
+            result += (f"Asset: {asset.asset_name}  | Total Investment: \n")
+        return result
+    
+    
+        
 def get_number_input(prompt:str,low=0):
     while True:
         try:
@@ -53,7 +64,9 @@ def get_number_input(prompt:str,low=0):
         
         except ValueError:
             print("Error: Please enter a valid number.")
-
+            
+def get_date_input(prompt: str):
+    pass
 
 def prompt_stock():
     """Prompts the User for detail input of the Stock to be added in Portfolio."""
@@ -64,11 +77,15 @@ def prompt_stock():
     
 def prompt_etf():
     """Prompts the User for detail input of the ETF (Exchange Traded Fund) to be added in Portfolio."""
-    pass
+    ticker = input("Enter TICKER: ").upper().strip()
+    quantity = get_number_input("Enter Quantity: ")
+    price = get_number_input("Enter Price: ")
+    return ETF(ticker,quantity,price)
 
 def prompt_mf():
     """Prompts the User for detail input of the Mutual Fund to be added in Portfolio."""
-    pass
+    scheme_name = input("Enter Scheme Name: ").strip()
+    NAV_date = input()
 
 def prompt_crypto():
     """Prompts the User for detail input of the Cryptocurrency to be added in Portfolio."""
@@ -113,12 +130,17 @@ def main():
             print("8. Cash Balance")
 
             asset_type = get_number_input("Select an Asset Type (1 - 8): ")
+            
             if (asset_type) == 1:
                 new_stock = prompt_stock()
-                vault.portfolio.append(new_stock)
+                vault.add_to_folio(new_stock)
                 print(f"The stock {new_stock.asset_name} is added to the portfolio.")
+                
             elif (asset_type) == 2:
-                prompt_etf()
+                new_etf = prompt_etf()
+                vault.add_to_folio(new_etf)
+                print(f"The ETF {new_etf.asset_name} is added to the portfolio.")
+                
             elif (asset_type) == 3:
                 prompt_mf()
             elif (asset_type) == 4:
@@ -134,6 +156,8 @@ def main():
             else:
                 print("Error: Select Valid option.")
                 continue
+        elif choice == 2:
+            print(vault.view_portfolio())
         elif choice == 4:
             print("Folio_Sync Closed!")
             break
