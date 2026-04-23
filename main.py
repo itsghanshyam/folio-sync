@@ -41,14 +41,14 @@ class MutualFund(Asset):
         self.units = units
         super().__init__(scheme_name,investment,nav_date)
         
-class Crypto:
+class Crypto(Asset):
     def __init__(self,ticker,quantity,price,purchase_date):
         self.ticker = ticker
         self.quantity = quantity
         self.price = price
         super().__init__(self,ticker,quantity*price,purchase_date)
 
-class FD:
+class FD(Asset):
     pass
 
 class Portfolio:
@@ -92,7 +92,16 @@ def get_date_input(prompt: str):
         except ValueError:
             print("Error: Invalid date format, Please Enter in DD-MM-YYYY format.")
         
-
+def get_bank_input(prompt: str,banks):
+    print("Available Banks: ")
+    for index,bank_name in enumerate(banks,1):
+        print(f"{index}. {bank_name}")
+    choice = get_number_input(prompt)
+    if choice == 1:
+        return banks[0].strip().upper()
+    if choice == 2:
+        pass
+        
 def prompt_stock():
     """Prompts the User for detail input of the Stock to be added in Portfolio."""
     ticker = input("Enter TICKER: ").upper()
@@ -141,7 +150,8 @@ def prompt_crypto():
 
 def prompt_fd():
     """Prompts the User for detail input of the Fixed Deposit to be added in Portfolio."""
-    pass
+    banks = ["SBI Bank","HDFC Bank","ICICI Bank","Axis Bank","Post Office","Other"]
+    
 
 def prompt_rd():
     """Prompts the User for detail input of the Recurring Deposit to be added in Portfolio."""
@@ -192,13 +202,16 @@ def main():
             elif (asset_type) == 3:
                 new_mf = prompt_mf()
                 vault.add_to_folio(new_mf)
-                print("The Mutual Fund Scheme {new_mf.asset_name} is added to the portfolio.")
+                print(f"The Mutual Fund Scheme {new_mf.asset_name} is added to the portfolio.")
                 
             elif (asset_type) == 4:
-                crypto = prompt_crypto()
-                
+                new_crypto = prompt_crypto()
+                vault.add_to_folio(new_crypto)
+                print(f"The Crypto Coin {new_crypto.asset_name} is added to the portfolio.")
+            
             elif (asset_type) == 5:
-                prompt_fd()
+                new_fd = prompt_fd()
+                
             elif (asset_type) == 6:
                 prompt_rd()
             elif (asset_type) == 7:
