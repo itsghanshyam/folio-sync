@@ -15,24 +15,41 @@ class Asset:
     """Asset is the parent class for all different types of Child instrument classes, 
     it stores the basic info like asset_name and capital invested."""
     
-    def __init__(self,asset_name,investment):
+    def __init__(self,asset_name,investment,purchase_date):
         self.asset_name = asset_name
         self.investment = investment
+        self.purchase_date = purchase_date
 
 class Stock(Asset):
-    def __init__(self,ticker,quantity,price):
+    def __init__(self,ticker,quantity,price,purchase_date):
         self.ticker = ticker
         self.quantity = quantity
         self.price = price
-        super().__init__(ticker,quantity*price)
+        super().__init__(ticker,quantity*price,purchase_date)
         
 class ETF(Asset):
-    def __init__(self,ticker,quantity,price):
+    def __init__(self,ticker,quantity,price,purchase_date):
         self.ticker = ticker
         self.quantity = quantity
         self.price = price
-        super().__init__(ticker,quantity*price)
+        super().__init__(ticker,quantity*price,purchase_date)
 
+class MutualFund(Asset):
+    def __init__(self,scheme_name,nav_date,nav,investment,units):
+        self.scheme_name = scheme_name
+        self.nav = nav
+        self.units = units
+        super().__init__(scheme_name,investment,nav_date)
+        
+class Crypto:
+    def __init__(self,ticker,quantity,price,purchase_date):
+        self.ticker = ticker
+        self.quantity = quantity
+        self.price = price
+        super().__init__(self,ticker,quantity*price,purchase_date)
+
+class FD:
+    pass
 
 class Portfolio:
     """The Portfolio Class holds the different Asset objects the User has invested in and does the operation on them like 
@@ -42,13 +59,11 @@ class Portfolio:
     def add_to_folio(self,item):
         self.portfolio.append(item)
     def view_portfolio(self):
-        result = ""
+        result = "\n"
         for asset in self.portfolio:
             result += (f"Asset: {asset.asset_name}  | Total Investment: \n")
         return result
     
-    
-        
 def get_number_input(prompt:str,low=0):
     while True:
         try:
@@ -66,30 +81,63 @@ def get_number_input(prompt:str,low=0):
             print("Error: Please enter a valid number.")
             
 def get_date_input(prompt: str):
-    pass
+    while True:
+        date = input(prompt).strip()
+        try:
+            if not date:
+                print("Date cannot be empty.")
+                continue
+            date = datetime.strptime(date,"%d-%m-%Y").date()
+            return date
+        except ValueError:
+            print("Error: Invalid date format, Please Enter in DD-MM-YYYY format.")
+        
 
 def prompt_stock():
     """Prompts the User for detail input of the Stock to be added in Portfolio."""
     ticker = input("Enter TICKER: ").upper()
     quantity = get_number_input("Enter Quantity: ")
     price = get_number_input("Enter Price: ")
-    return Stock(ticker,quantity,price)
+    purchase_date = get_date_input("Purchasing Date (DD-MM-YYYY): ")
+    return Stock(ticker,quantity,price,purchase_date)
     
 def prompt_etf():
     """Prompts the User for detail input of the ETF (Exchange Traded Fund) to be added in Portfolio."""
     ticker = input("Enter TICKER: ").upper().strip()
     quantity = get_number_input("Enter Quantity: ")
     price = get_number_input("Enter Price: ")
-    return ETF(ticker,quantity,price)
+    purchase_date = get_date_input("Purchasing Date (DD-MM-YYYY): ")
+    return ETF(ticker,quantity,price,purchase_date)
 
 def prompt_mf():
     """Prompts the User for detail input of the Mutual Fund to be added in Portfolio."""
     scheme_name = input("Enter Scheme Name: ").strip()
-    NAV_date = input()
+    nav_date = get_date_input("NAV Date (DD-MM-YYYY): ")
+    nav = get_number_input("Purchase NAV: ")
+    while True:
+        print("How would you like to Enter your holdings?\n")
+        print("1. Enter Total Purchase Amount")
+        print("2. Enter Number of Units bought\n")
+        choice = get_number_input("Choose an option: ")
+        if choice == 1:
+            investment = get_number_input("Purchase Amount: ")
+            units = (investment/nav)
+            break
+        elif choice == 2:
+            units = get_number_input("Number of Units: ")
+            investment = (units*nav)
+            break
+        else:
+            print("Choose a valid option: ")
+    return MutualFund(scheme_name,nav_date,nav,investment,units)
 
 def prompt_crypto():
     """Prompts the User for detail input of the Cryptocurrency to be added in Portfolio."""
-    pass
+    ticker = input("Enter coin TICKER: ").upper()
+    quantity = get_number_input("Enter Quantity: ")
+    price = get_number_input("Enter Price: ")
+    purchase_date = get_date_input("Purchasing Date (DD-MM-YYYY): ")
+    return Crypto(ticker,quantity,price,purchase_date)
 
 def prompt_fd():
     """Prompts the User for detail input of the Fixed Deposit to be added in Portfolio."""
@@ -142,9 +190,13 @@ def main():
                 print(f"The ETF {new_etf.asset_name} is added to the portfolio.")
                 
             elif (asset_type) == 3:
-                prompt_mf()
+                new_mf = prompt_mf()
+                vault.add_to_folio(new_mf)
+                print("The Mutual Fund Scheme {new_mf.asset_name} is added to the portfolio.")
+                
             elif (asset_type) == 4:
-                prompt_crypto()
+                crypto = prompt_crypto()
+                
             elif (asset_type) == 5:
                 prompt_fd()
             elif (asset_type) == 6:
