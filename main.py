@@ -46,9 +46,17 @@ class Crypto(Asset):
         self.ticker = ticker
         self.quantity = quantity
         self.price = price
-        super().__init__(self,ticker,quantity*price,purchase_date)
+        super().__init__(ticker,quantity*price,purchase_date)
 
 class FD(Asset):
+    def __init__(self,name,bank_name,investment,interest_rate,investment_date,tenure_days):
+        self.name = name
+        self.bank_name = bank_name
+        self.interest_rate = interest_rate
+        self.tenure_days = tenure_days # TODO: Upgrade to accurate calendar shift logic
+        super().__init__(f"{name} ({bank_name})",investment,investment_date)
+         
+class RD(Asset):
     pass
 
 class Portfolio:
@@ -99,9 +107,26 @@ def get_bank_input(prompt: str,banks):
     choice = get_number_input(prompt)
     if choice == 1:
         return banks[0].strip().upper()
-    if choice == 2:
-        pass
-        
+    elif choice == 2:
+        return banks[1].strip().upper()
+    elif choice == 3:
+        return banks[2].strip().upper()
+    elif choice == 4:
+        return banks[3].strip().upper()
+    elif choice == 5:
+        return banks[4].strip().upper()
+    else:
+        choice = input("Enter Bank Name: ").strip().upper()
+        return choice
+    
+def get_duration_days(prompt):
+    print(prompt)
+    years = get_number_input("Enter Tenure (Years): ")
+    months = get_number_input("Enter Tenure (Months): ")
+    days = get_number_input("Enter Tenure (Days): ")
+    tenure_days = (years*365) + (months*30) + days # TODO: Upgrade to accurate calendar shift logic
+    return tenure_days 
+
 def prompt_stock():
     """Prompts the User for detail input of the Stock to be added in Portfolio."""
     ticker = input("Enter TICKER: ").upper()
@@ -120,7 +145,7 @@ def prompt_etf():
 
 def prompt_mf():
     """Prompts the User for detail input of the Mutual Fund to be added in Portfolio."""
-    scheme_name = input("Enter Scheme Name: ").strip()
+    scheme_name = input("Enter Scheme Name: ").strip().upper()
     nav_date = get_date_input("NAV Date (DD-MM-YYYY): ")
     nav = get_number_input("Purchase NAV: ")
     while True:
@@ -151,6 +176,13 @@ def prompt_crypto():
 def prompt_fd():
     """Prompts the User for detail input of the Fixed Deposit to be added in Portfolio."""
     banks = ["SBI Bank","HDFC Bank","ICICI Bank","Axis Bank","Post Office","Other"]
+    name = input("Name for FD: ").upper()
+    bank_name = get_bank_input("Choose the Bank for FD:",banks)
+    investment = get_number_input("Investment Amount: ")
+    interest_rate = get_number_input("Intereset Rate: ")
+    investment_date = get_date_input("Date of Investment (DD-MM-YYYY): ") # TODO: Need to add tenure
+    tenure_days = get_duration_days("Tenure for Fixed Deposit (FD)")
+    return FD(name,bank_name,investment,interest_rate,investment_date,tenure_days)
     
 
 def prompt_rd():
@@ -189,8 +221,8 @@ def main():
 
             asset_type = get_number_input("Select an Asset Type (1 - 8): ")
             
-            if (asset_type) == 1:
-                new_stock = prompt_stock()
+            if (asset_type) == 1:           #TODO: Add a confirmation message before adding.
+                new_stock = prompt_stock()      #TODO: Add an option to cancel adding the asset and go back.
                 vault.add_to_folio(new_stock)
                 print(f"The stock {new_stock.asset_name} is added to the portfolio.")
                 
@@ -211,6 +243,8 @@ def main():
             
             elif (asset_type) == 5:
                 new_fd = prompt_fd()
+                vault.add_to_folio(new_fd)
+                print(f"The Fixed deposit {new_fd.asset_name} is added to the portfolio.")
                 
             elif (asset_type) == 6:
                 prompt_rd()
