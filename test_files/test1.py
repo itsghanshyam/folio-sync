@@ -31,20 +31,9 @@ def get_bank_input(prompt: str,banks):
     for index,bank_name in enumerate(banks,1):
         print(f"{index}. {bank_name}")
     choice = get_number_input(prompt)
-    if choice == 1:
-        return banks[0].strip().upper()
-    elif choice == 2:
-        return banks[1].strip().upper()
-    elif choice == 3:
-        return banks[2].strip().upper()
-    elif choice == 4:
-        return banks[3].strip().upper()
-    elif choice == 5:
-        return banks[4].strip().upper()
-    else:
-        choice = input("Enter bank: ")
-        return choice
-print(get_bank_input("Choose a bank: ",banks))
+    if 1 <=choice <= len(banks):
+        return banks[int(choice)-1].upper().strip()
+print(get_bank_input("Enter bank name",banks))
     
 
 

@@ -19,44 +19,47 @@ class Asset:
         self.asset_name = asset_name
         self.investment = investment
         self.purchase_date = purchase_date
-
-class Stock(Asset):
-    def __init__(self,ticker,quantity,price,purchase_date):
-        self.ticker = ticker
-        self.quantity = quantity
-        self.price = price
-        super().__init__(ticker,quantity*price,purchase_date)
         
-class ETF(Asset):
+class MarketAsset(Asset):
     def __init__(self,ticker,quantity,price,purchase_date):
         self.ticker = ticker
         self.quantity = quantity
         self.price = price
         super().__init__(ticker,quantity*price,purchase_date)
 
+class FixedIncomeAsset(Asset):
+    def __init__(self,name,bank_name,investment,interest_rate,investment_date,tenure_days):
+        self.name = name
+        self.bank_name = bank_name
+        self.interest_rate = interest_rate
+        self.tenure_days = tenure_days
+        super().__init__(f"{name} ({bank_name})",investment,investment_date)
+        
+class Stock(MarketAsset):
+    def __init__(self,ticker,quantity,price,purchase_date):
+        super().__init__(ticker,quantity,price,purchase_date)
+        
+class ETF(MarketAsset):
+    def __init__(self,ticker,quantity,price,purchase_date):
+        super().__init__(ticker,quantity,price,purchase_date)
+
+class Crypto(MarketAsset):
+    def __init__(self,ticker,quantity,price,purchase_date):
+        super().__init__(ticker,quantity,price,purchase_date)
+    
 class MutualFund(Asset):
     def __init__(self,scheme_name,nav_date,nav,investment,units):
         self.scheme_name = scheme_name
         self.nav = nav
         self.units = units
         super().__init__(scheme_name,investment,nav_date)
-        
-class Crypto(Asset):
-    def __init__(self,ticker,quantity,price,purchase_date):
-        self.ticker = ticker
-        self.quantity = quantity
-        self.price = price
-        super().__init__(ticker,quantity*price,purchase_date)
 
-class FD(Asset):
+class FD(FixedIncomeAsset):
     def __init__(self,name,bank_name,investment,interest_rate,investment_date,tenure_days):
-        self.name = name
-        self.bank_name = bank_name
-        self.interest_rate = interest_rate
-        self.tenure_days = tenure_days # TODO: Upgrade to accurate calendar shift logic
-        super().__init__(f"{name} ({bank_name})",investment,investment_date)
+     # TODO: Upgrade to accurate calendar shift logic
+        super().__init__(name,bank_name,investment,interest_rate,investment_date,tenure_days)
          
-class RD(Asset):
+class RD(FixedIncomeAsset):
     pass
 
 class Portfolio:
@@ -102,23 +105,20 @@ def get_date_input(prompt: str):
         
 def get_bank_input(prompt: str,banks):
     print("Available Banks: ")
-    for index,bank_name in enumerate(banks,1):
-        print(f"{index}. {bank_name}")
-    choice = get_number_input(prompt)
-    if choice == 1:
-        return banks[0].strip().upper()
-    elif choice == 2:
-        return banks[1].strip().upper()
-    elif choice == 3:
-        return banks[2].strip().upper()
-    elif choice == 4:
-        return banks[3].strip().upper()
-    elif choice == 5:
-        return banks[4].strip().upper()
-    else:
-        choice = input("Enter Bank Name: ").strip().upper()
-        return choice
-    
+    while True:
+        for index,bank_name in enumerate(banks,1):
+            print(f"{index}. {bank_name}")
+        choice = get_number_input(prompt)
+        if 1 <=choice <= len(banks):
+            bank = banks[int(choice)-1]
+            if bank.upper() == "OTHER":
+                custom_bank = input("Enter bank name: ").upper().strip()
+                return custom_bank
+            else:
+                return bank.upper().strip()
+        else:
+            print(f"Error: Enter a number between 1 and {len(banks)}")
+
 def get_duration_days(prompt):
     print(prompt)
     years = get_number_input("Enter Tenure (Years): ")
